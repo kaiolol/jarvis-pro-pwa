@@ -742,6 +742,12 @@
     });
   }
 
+  // Atalho: abrir o link com ?voz=on já liga a voz automaticamente neste navegador
+  try {
+    var __params = new URLSearchParams(window.location.search);
+    if (__params.get('voz') === 'on') setVoiceOn(true);
+  } catch(e){}
+
   updateVoiceToggleUI();
   refreshNet();
   renderAll();
