@@ -26,6 +26,7 @@
     --text: #e7f6fb;
     --text-dim: #6f93a6;
     --danger: #ff6b6b;
+    --ok: #3cf0b0;
     --radius: 14px;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -133,10 +134,11 @@
   #main{ flex:1; min-width:0; display:flex; flex-direction:column; }
 
   #topbar{
-    display:flex; align-items:center; gap:14px;
+    display:flex; align-items:center; gap:10px;
     padding: calc(14px + var(--safe-top)) 20px 12px;
     border-bottom: 1px solid var(--line-soft);
     flex-shrink:0;
+    flex-wrap: wrap;
   }
   #hamburger{
     display:none;
@@ -148,10 +150,12 @@
     font-size:11.5px; color: var(--text-dim);
     border: 1px solid var(--line-soft);
     padding: 6px 12px; border-radius: 20px;
+    white-space: nowrap;
   }
-  .dot{ width:7px; height:7px; border-radius:50%; background:#4a5c66; }
-  .dot.ok{ background:#3cf0b0; box-shadow:0 0 6px #3cf0b0; }
+  .dot{ width:7px; height:7px; border-radius:50%; background:#4a5c66; flex-shrink:0; }
+  .dot.ok{ background:var(--ok); box-shadow:0 0 6px var(--ok); }
   .dot.busy{ background: var(--cyan); animation: dotpulse 1s infinite; }
+  .dot.bad{ background: var(--danger); box-shadow:0 0 6px var(--danger); }
   @keyframes dotpulse{ 0%,100%{opacity:1;} 50%{opacity:0.3;} }
   #clockbox{ font-size:12px; color: var(--text-dim); margin-left:auto; text-align:right; }
   #clockbox b{ color: var(--text); font-weight:600; }
@@ -190,13 +194,14 @@
   /* ---------- Central core (empty state) ---------- */
   #empty{ margin:auto; text-align:center; padding: 10px 20px 40px; }
   .core{
-    width: 150px; height:150px; margin: 0 auto 22px; position: relative;
+    width: 160px; height:160px; margin: 0 auto 22px; position: relative;
   }
   .core .ring{ position:absolute; inset:0; border-radius:50%; border: 1.5px solid var(--line); }
   .core .ring.r1{ animation: spin 9s linear infinite; border-top-color: var(--cyan); border-right-color: var(--cyan); }
   .core .ring.r2{ inset: 16px; border-style: dashed; opacity:0.5; animation: spin 14s linear infinite reverse; }
+  .core .ring.r3{ inset: -14px; border-style:dotted; opacity:0.35; animation: spin 22s linear infinite; }
   .core .glow{
-    position:absolute; inset: 34px; border-radius:50%;
+    position:absolute; inset: 40px; border-radius:50%;
     background: radial-gradient(circle at 42% 38%, #aef6ff, var(--cyan) 35%, var(--cyan-dim) 75%, transparent 78%);
     box-shadow: 0 0 40px rgba(40,232,255,0.65), 0 0 90px rgba(40,232,255,0.25);
     animation: pulse 2.6s ease-in-out infinite;
@@ -206,10 +211,24 @@
   #empty h2{ font-size:19px; font-weight:600; margin:0 0 8px; letter-spacing:0.3px; }
   #empty p{ font-size:13px; color:var(--text-dim); max-width:360px; margin:0 auto; line-height:1.5; }
 
+  /* ---------- Action bar ---------- */
+  #actionbar{
+    display:flex; justify-content:center; gap:8px; padding: 2px 2px 12px; flex-wrap:wrap;
+  }
+  .action-chip{
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    font-size:9.5px; letter-spacing:0.2px; color:var(--text-dim);
+    background: var(--panel); border:1px solid var(--line-soft); border-radius:12px;
+    padding:8px 14px; cursor:pointer; min-width:62px; user-select:none;
+  }
+  .action-chip svg{ width:16px; height:16px; }
+  .action-chip.on{ color:var(--cyan); border-color:var(--line); box-shadow:0 0 12px rgba(40,232,255,0.25); }
+  .action-chip.disabled{ opacity:0.4; cursor:default; }
+
   /* ---------- Composer ---------- */
   form#composer{
     display:flex; align-items:flex-end; gap:10px;
-    padding: 12px 2px calc(16px + var(--safe-bottom));
+    padding: 4px 2px calc(16px + var(--safe-bottom));
     flex-shrink:0;
   }
   .hud-panel{ position:relative; }
@@ -242,6 +261,33 @@
   #send{ background: var(--cyan); color:#021a1f; border:none; }
   #mic.listening{ background: var(--cyan); color:#021a1f; box-shadow:0 0 16px rgba(40,232,255,0.8); }
 
+  /* ---------- Right panel ---------- */
+  #rightpanel{
+    width: 260px;
+    flex-shrink: 0;
+    border-left: 1px solid var(--line-soft);
+    background: rgba(6,12,20,0.55);
+    padding: calc(16px + var(--safe-top)) 14px 16px;
+    display:flex; flex-direction:column; gap:14px;
+    overflow-y:auto;
+    backdrop-filter: blur(8px);
+  }
+  .hud-card{
+    background: var(--panel); border:1px solid var(--line-soft); border-radius:12px; padding:14px;
+  }
+  .panel-title{
+    font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--text-dim);
+    margin:0 0 10px;
+  }
+  .sys-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:12.5px; padding:7px 0; border-bottom:1px solid var(--line-soft); }
+  .sys-row:last-child{ border-bottom:none; }
+  .sys-row .label{ display:flex; align-items:center; gap:8px; color:var(--text); }
+  .sys-row .label .dot{ position:static; }
+  .sys-row .state{ font-size:10.5px; color:var(--text-dim); white-space:nowrap; }
+  .sys-row .state.ok{ color:var(--ok); }
+  .sys-row .state.bad{ color:var(--danger); }
+  .empty-note{ font-size:11.5px; color:var(--text-dim); line-height:1.5; margin:0; }
+
   /* ---------- Overlays ---------- */
   .overlay{ position:fixed; inset:0; background:rgba(2,6,12,0.78); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; padding:24px; z-index:50; }
   .overlay.hidden{ display:none; }
@@ -265,6 +311,9 @@
   #scrim{ position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:39; display:none; }
   #scrim.show{ display:block; }
 
+  @media (max-width: 1180px){
+    #rightpanel{ display:none; }
+  }
   @media (max-width: 820px){
     #sidebar{
       position: fixed; left:0; top:0; bottom:0; z-index:40;
@@ -328,6 +377,7 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
       </button>
       <div class="status-pill"><span class="dot" id="statusDot"></span><span id="statusLine">verificando...</span></div>
+      <div class="status-pill"><span class="dot" id="netDot"></span><span id="netLine">rede</span></div>
       <div id="clockbox"><b id="clockTime">--:--</b><br><span id="clockDate">--/--/----</span></div>
       <button class="round-btn" id="settingsBtn" style="width:36px;height:36px;" title="Configurações">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -340,10 +390,34 @@
           <div class="core">
             <div class="ring r1"></div>
             <div class="ring r2"></div>
+            <div class="ring r3"></div>
             <div class="glow"></div>
           </div>
-                    <h2 id="greeting">Olá, Kaio!</h2>
+          <h2 id="greeting">Olá!</h2>
           <p>Mande uma mensagem ou toque no microfone pra falar com o JARVIS. Tudo fica registrado no seu banco em tempo real.</p>
+        </div>
+      </div>
+
+      <div id="actionbar">
+        <button type="button" class="action-chip" id="voiceToggle" title="Ligar/desligar o JARVIS falando as respostas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M19 9a5 5 0 0 1 0 6"/></svg>
+          Voz
+        </button>
+        <div class="action-chip disabled" title="Em breve">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2a5.5 5.5 0 0 0-5.3 6.9A4 4 0 0 0 5 16.9V19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-1h4v1a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-2.1a4 4 0 0 0 .8-7.9A5.5 5.5 0 0 0 14.5 2a5.4 5.4 0 0 0-2.5.6A5.4 5.4 0 0 0 9.5 2Z"/></svg>
+          Inteligência
+        </div>
+        <div class="action-chip disabled" title="Em breve">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+          Análises
+        </div>
+        <div class="action-chip disabled" title="Em breve">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6Z"/></svg>
+          Segurança
+        </div>
+        <div class="action-chip disabled" title="Em breve">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5c-1.5 1.5-2 5-2 5s3.5-.5 5-2c.8-.8.8-2.2 0-3a2.1 2.1 0 0 0-3 0Z"/><path d="M12 15l-3-3a22 22 0 0 1 7-9c2.5-1 5-1 5-1s0 2.5-1 5a22 22 0 0 1-9 7Z"/><path d="M9 12 6 9"/></svg>
+          Executar
         </div>
       </div>
 
@@ -358,6 +432,24 @@
       </form>
     </div>
   </div>
+
+  <aside id="rightpanel">
+    <div class="hud-card">
+      <div class="panel-title">Sistemas</div>
+      <div class="sys-row"><span class="label"><span class="dot" id="sysN8nDot"></span>n8n</span><span class="state" id="sysN8nText">verificando...</span></div>
+      <div class="sys-row"><span class="label"><span class="dot"></span>Supabase</span><span class="state">via workflow</span></div>
+      <div class="sys-row"><span class="label"><span class="dot"></span>KBR Engenharia</span><span class="state">em breve</span></div>
+      <div class="sys-row"><span class="label"><span class="dot"></span>Tito Bombas</span><span class="state">em breve</span></div>
+    </div>
+    <div class="hud-card">
+      <div class="panel-title">Próximas tarefas</div>
+      <p class="empty-note">Ainda não conectado à sua agenda/tarefas. Assim que essa integração for ligada, elas aparecem aqui.</p>
+    </div>
+    <div class="hud-card">
+      <div class="panel-title">Projetos</div>
+      <p class="empty-note">Em breve: status dos seus projetos (Hub PRO, Tito Bombas, KBR) aqui.</p>
+    </div>
+  </aside>
 </div>
 
 <!-- Setup inicial -->
@@ -395,6 +487,7 @@
   var HEADER_NAME = 'X-Jarvis-Key';
   var LS_KEY = 'jarvis_pro_api_key';
   var LS_HISTORY = 'jarvis_pro_history';
+  var LS_VOICE = 'jarvis_pro_voice_on';
   var OWNER_NAME = 'Kaio';
 
   var chatEl = document.getElementById('chat');
@@ -406,6 +499,11 @@
   var micBtn = document.getElementById('mic');
   var statusDot = document.getElementById('statusDot');
   var statusLine = document.getElementById('statusLine');
+  var netDot = document.getElementById('netDot');
+  var netLine = document.getElementById('netLine');
+  var sysN8nDot = document.getElementById('sysN8nDot');
+  var sysN8nText = document.getElementById('sysN8nText');
+  var voiceToggle = document.getElementById('voiceToggle');
 
   var setupOverlay = document.getElementById('setupOverlay');
   var setupKey = document.getElementById('setupKey');
@@ -431,13 +529,29 @@
   function setKey(v){ try { localStorage.setItem(LS_KEY, v); } catch(e){} }
   function loadHistory(){ try { return JSON.parse(localStorage.getItem(LS_HISTORY) || '[]'); } catch(e){ return []; } }
   function saveHistory(list){ try { localStorage.setItem(LS_HISTORY, JSON.stringify(list.slice(-200))); } catch(e){} }
+  function getVoiceOn(){ try { return localStorage.getItem(LS_VOICE) === '1'; } catch(e){ return false; } }
+  function setVoiceOn(v){ try { localStorage.setItem(LS_VOICE, v ? '1' : '0'); } catch(e){} }
 
   var history = loadHistory();
 
-  function refreshStatusDot(){
-    if (getKey()) { statusDot.className = 'dot ok'; statusLine.textContent = 'pronto'; }
-    else { statusDot.className = 'dot'; statusLine.textContent = 'sem chave'; }
+  function setSysN8n(text, state){
+    sysN8nText.textContent = text;
+    sysN8nText.className = 'state' + (state ? ' ' + state : '');
+    sysN8nDot.className = 'dot' + (state === 'ok' ? ' ok' : (state === 'bad' ? ' bad' : ''));
   }
+
+  function refreshStatusDot(){
+    if (getKey()) { statusDot.className = 'dot ok'; statusLine.textContent = 'pronto'; setSysN8n('pronto', 'ok'); }
+    else { statusDot.className = 'dot'; statusLine.textContent = 'sem chave'; setSysN8n('sem chave', ''); }
+  }
+
+  function refreshNet(){
+    var on = navigator.onLine;
+    netDot.className = 'dot' + (on ? ' ok' : ' bad');
+    netLine.textContent = on ? 'rede online' : 'sem internet';
+  }
+  window.addEventListener('online', refreshNet);
+  window.addEventListener('offline', refreshNet);
 
   function renderAll(){
     chatEl.querySelectorAll('.msg, .typing').forEach(function(n){ n.remove(); });
@@ -466,9 +580,45 @@
 
   function setBusy(busy){
     sendBtn.disabled = busy;
-    if (busy){ statusDot.className = 'dot busy'; statusLine.textContent = 'pensando...'; }
+    if (busy){ statusDot.className = 'dot busy'; statusLine.textContent = 'pensando...'; setSysN8n('pensando...', ''); }
     else { refreshStatusDot(); }
   }
+
+  // ---------- Voz (texto-para-fala) ----------
+  var ttsVoice = null;
+  function pickVoice(){
+    if (!('speechSynthesis' in window)) return;
+    var voices = window.speechSynthesis.getVoices();
+    if (!voices || !voices.length) return;
+    var ptVoices = voices.filter(function(v){ return (v.lang || '').toLowerCase().indexOf('pt') === 0; });
+    var male = ptVoices.find(function(v){ return /male|ricardo|daniel|felipe|google português do brasil/i.test(v.name); });
+    ttsVoice = male || ptVoices[0] || voices[0];
+  }
+  if ('speechSynthesis' in window){
+    pickVoice();
+    window.speechSynthesis.onvoiceschanged = pickVoice;
+  }
+  function speak(text){
+    if (!getVoiceOn() || !('speechSynthesis' in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = 'pt-BR';
+      u.pitch = 0.82;
+      u.rate = 0.98;
+      if (ttsVoice) u.voice = ttsVoice;
+      window.speechSynthesis.speak(u);
+    } catch(e){}
+  }
+  function updateVoiceToggleUI(){
+    voiceToggle.classList.toggle('on', getVoiceOn());
+  }
+  voiceToggle.addEventListener('click', function(){
+    setVoiceOn(!getVoiceOn());
+    updateVoiceToggleUI();
+    if (getVoiceOn()) speak('Voz ativada.');
+    else window.speechSynthesis && window.speechSynthesis.cancel();
+  });
 
   async function sendMessage(text){
     history.push({ role:'user', text:text }); saveHistory(history);
@@ -482,10 +632,12 @@
       hideTyping();
       if (resp.status === 401 || resp.status === 403){
         appendBubble('error', 'Chave de acesso recusada. Verifique a chave em Configurações.');
+        setSysN8n('chave recusada', 'bad');
         setBusy(false); return;
       }
       if (!resp.ok){
         appendBubble('error', 'O servidor respondeu com erro (' + resp.status + '). Tente novamente em instantes.');
+        setSysN8n('erro ' + resp.status, 'bad');
         setBusy(false); return;
       }
       var data = await resp.json().catch(function(){ return null; });
@@ -493,9 +645,11 @@
       if (!reply){ appendBubble('error', 'Resposta do servidor veio em formato inesperado.'); setBusy(false); return; }
       history.push({ role:'assistant', text:reply }); saveHistory(history);
       appendBubble('assistant', reply);
+      speak(reply);
     } catch(err){
       hideTyping();
       appendBubble('error', 'Não consegui falar com o servidor. Verifique sua internet e tente de novo.');
+      setSysN8n('offline', 'bad');
     }
     setBusy(false);
   }
@@ -544,7 +698,6 @@
   function closeDrawer(){ sidebar.classList.remove('open'); scrim.classList.remove('show'); }
   hamburger.addEventListener('click', openDrawer);
   scrim.addEventListener('click', closeDrawer);
-  document.getElementById('navSettings'); // active nav is already "chat"
 
   // Voice input (Web Speech API) — only runs if the browser supports it
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -584,6 +737,8 @@
     });
   }
 
+  updateVoiceToggleUI();
+  refreshNet();
   renderAll();
   checkSetup();
 })();
