@@ -591,8 +591,12 @@
     var voices = window.speechSynthesis.getVoices();
     if (!voices || !voices.length) return;
     var ptVoices = voices.filter(function(v){ return (v.lang || '').toLowerCase().indexOf('pt') === 0; });
-    var male = ptVoices.find(function(v){ return /male|ricardo|daniel|felipe|google português do brasil/i.test(v.name); });
-    ttsVoice = male || ptVoices[0] || voices[0];
+    // Prioridade: vozes masculinas em pt-BR conhecidas (Windows/Edge, Android), depois qualquer voz
+    // marcada "male", depois a voz padrão do Google (geralmente a única opção no Chrome), depois qualquer pt.
+    var byName = ptVoices.find(function(v){ return /daniel|antonio|antónio|fab[ií]o|ricardo|felipe|diego|marcos|thiago/i.test(v.name); });
+    var byGender = ptVoices.find(function(v){ return /male/i.test(v.name) && !/female/i.test(v.name); });
+    var google = ptVoices.find(function(v){ return /google português do brasil/i.test(v.name); });
+    ttsVoice = byName || byGender || google || ptVoices[0] || voices[0];
   }
   if ('speechSynthesis' in window){
     pickVoice();
@@ -604,8 +608,9 @@
       window.speechSynthesis.cancel();
       var u = new SpeechSynthesisUtterance(text);
       u.lang = 'pt-BR';
-      u.pitch = 0.82;
-      u.rate = 0.98;
+      // Tom grave, calmo e cadenciado — identidade própria do JARVIS PRO (não é clone de voz de ator/dublador)
+      u.pitch = 0.78;
+      u.rate = 0.93;
       if (ttsVoice) u.voice = ttsVoice;
       window.speechSynthesis.speak(u);
     } catch(e){}
