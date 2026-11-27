@@ -602,15 +602,45 @@
     pickVoice();
     window.speechSynthesis.onvoiceschanged = pickVoice;
   }
+  // Limpa marcação (markdown) do texto antes de falar, para a voz não ler
+  // asteriscos, cerquilhas, traços de lista, links etc. em voz alta.
+  function stripForSpeech(text){
+    if (!text) return '';
+    var t = String(text);
+    t = t.replace(/\r/g, '');
+    // links [texto](url) -> texto
+    t = t.replace(/\[([^\]]+)\]\((?:[^)]+)\)/g, '$1');
+    // negrito/itálico **x**, __x__, *x*, _x_  -> x
+    t = t.replace(/\*\*\*([^*]+)\*\*\*/g, '$1');
+    t = t.replace(/\*\*([^*]+)\*\*/g, '$1');
+    t = t.replace(/__([^_]+)__/g, '$1');
+    t = t.replace(/\*([^*\n]+)\*/g, '$1');
+    t = t.replace(/(^|\s)_([^_\n]+)_(?=\s|$)/g, '$1$2');
+    // código `x` ou ```x``` -> x
+    t = t.replace(/```[\s\S]*?```/g, function(m){ return m.replace(/```/g, ''); });
+    t = t.replace(/`([^`]+)`/g, '$1');
+    // cabeçalhos "# Título" -> "Título"
+    t = t.replace(/^#{1,6}\s*/gm, '');
+    // marcadores de lista "- item" / "* item" / "• item" -> "item"
+    t = t.replace(/^\s*[-*•]\s+/gm, '');
+    // qualquer asterisco, cerquilha ou underline que tenha sobrado
+    t = t.replace(/[*_#]+/g, '');
+    // espaços e linhas em excesso
+    t = t.replace(/[ \t]+/g, ' ');
+    t = t.replace(/\n{2,}/g, '. ');
+    t = t.replace(/\n/g, ', ');
+    return t.trim();
+  }
   function speak(text){
     if (!getVoiceOn() || !('speechSynthesis' in window)) return;
     try {
       window.speechSynthesis.cancel();
-      var u = new SpeechSynthesisUtterance(text);
+      var u = new SpeechSynthesisUtterance(stripForSpeech(text));
       u.lang = 'pt-BR';
-      // Tom grave, calmo e cadenciado — identidade própria do JARVIS PRO (não é clone de voz de ator/dublador)
-      u.pitch = 0.78;
-      u.rate = 0.93;
+      // Tom natural, próximo do neutro da própria voz do aparelho — evita o
+      // efeito "robótico" que vem de forçar grave/devagar demais.
+      u.pitch = 1.0;
+      u.rate = 0.98;
       if (ttsVoice) u.voice = ttsVoice;
       window.speechSynthesis.speak(u);
     } catch(e){}
